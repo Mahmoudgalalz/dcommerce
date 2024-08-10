@@ -7,7 +7,7 @@ import { CorsOptionsCallback } from '@nestjs/common/interfaces/external/cors-opt
 async function bootstrap() {
   const PORT = 9000;
   const app = await NestFactory.create(AppModule);
-  const allowlist = ['http://localhost:8080'];
+  const allowlist = ['http://localhost:5173'];
 
   const corsOptionsDelegate = (req: Request, callback: CorsOptionsCallback) => {
     const corsOptions = {

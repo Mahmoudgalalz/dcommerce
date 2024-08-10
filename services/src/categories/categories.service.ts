@@ -15,7 +15,7 @@ export class CategoryService {
       data: {
         name,
         description,
-        attributes: attributes.join(','),
+        attributes: JSON.stringify(attributes), // Store attributes as JSON string
       },
     });
   }
@@ -24,7 +24,7 @@ export class CategoryService {
     const categories = await this.prisma.category.findMany();
     return categories.map((category) => ({
       ...category,
-      attributes: category.attributes ? category.attributes.split(',') : [],
+      attributes: JSON.parse(category.attributes || '[]'), // Parse JSON string to array
     }));
   }
 
@@ -42,7 +42,7 @@ export class CategoryService {
 
     return {
       ...category,
-      attributes: category.attributes ? category.attributes.split(',') : [],
+      attributes: JSON.parse(category.attributes || '[]'), // Parse JSON string to array
     };
   }
 
@@ -57,7 +57,7 @@ export class CategoryService {
       data: {
         name,
         description,
-        attributes: attributes?.join(','),
+        attributes: attributes ? JSON.stringify(attributes) : undefined, // Store as JSON string if provided
       },
     });
   }

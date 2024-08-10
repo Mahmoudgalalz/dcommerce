@@ -31,20 +31,32 @@ export class ProductService {
   }
 
   async getAllProducts(): Promise<Product[]> {
-    return this.prisma.product.findMany({
+    const products = await this.prisma.product.findMany({
       include: {
         attributes: true,
       },
     });
+
+    return products.map((product) => ({
+      ...product,
+      images: product.images ? JSON.parse(product.images) : [],
+    }));
   }
 
   async getProductById(id: number): Promise<Product | null> {
-    return this.prisma.product.findUnique({
+    const product = await this.prisma.product.findUnique({
       where: { id },
       include: {
         attributes: true,
       },
     });
+
+    if (!product) return null;
+
+    return {
+      ...product,
+      images: product.images ? JSON.parse(product.images) : [],
+    };
   }
 
   async updateProduct(
@@ -96,7 +108,7 @@ export class ProductService {
       });
     }
 
-    return this.prisma.product.findMany({
+    const products = await this.prisma.product.findMany({
       where: {
         name: { contains: name },
         category: category ? { contains: category } : undefined,
@@ -112,5 +124,10 @@ export class ProductService {
         attributes: true,
       },
     });
+
+    return products.map((product) => ({
+      ...product,
+      images: product.images ? JSON.parse(product.images) : [],
+    }));
   }
 }
