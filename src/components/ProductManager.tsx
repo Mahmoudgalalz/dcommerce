@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { fetchProducts, addProduct, deleteProductById, updateProduct } from './services/productService';
-import ProductList from './components/ProductList';
-import AddProductModal from './components/AddProductModal';
+import AddProductModal from '../components/AddProductModal';
+import ProductList from '../components/ProductList';
+import { fetchProducts, addProduct, updateProduct, deleteProductById } from '../services/productService';
+
 
 
 interface ProductManagerProps {}

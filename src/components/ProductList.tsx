@@ -1,26 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ProductCard from './ProductCard';
-import { fetchProducts, searchProducts } from '../services/productService';
+import { searchProducts } from '../services/productService';
 
-const ProductList = () => {
-  const [products, setProducts] = useState([]);
+interface ProductListProps {
+  products: Product[];
+  setProducts: (products: Product[]) => void;
+  onUpdateProduct: (product: Product) => void;
+  onDeleteProduct: (productId: string) => void;
+}
+
+const ProductList = ({ products, setProducts, onUpdateProduct, onDeleteProduct }: ProductListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchProducts().then(data => setProducts(data));
-  }, []);
-
   const handleSearch = async () => {
-    const result = await searchProducts({ searchTerm });
+    const result = await searchProducts(searchTerm);
     setProducts(result);
   };
 
   return (
-    <div className="p-8 min-h-screen">
+    <div>
       <div className="mb-6 flex justify-center">
         <input 
           type="text" 
-          placeholder="Search by name, category, or attributes" 
+          placeholder="Search by name or attributes" 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -35,7 +37,12 @@ const ProductList = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            onUpdateProduct={onUpdateProduct}
+            onDeleteProduct={onDeleteProduct}
+          />
         ))}
       </div>
     </div>

@@ -8,7 +8,6 @@ export class ProductService {
 
   async createProduct(
     name: string,
-    category: string,
     description: string,
     images: string[],
     price: number,
@@ -19,7 +18,6 @@ export class ProductService {
     return this.prisma.product.create({
       data: {
         name,
-        category,
         description,
         images: imagesJson,
         price,
@@ -62,29 +60,46 @@ export class ProductService {
   async updateProduct(
     id: number,
     name?: string,
-    category?: string,
     description?: string,
     images?: string[],
     price?: number,
-    attributes?: { name: string; value: string }[],
+    attributes?: { id?: number; name: string; value: string }[],
   ): Promise<Product> {
     const imagesJson = images ? JSON.stringify(images) : undefined;
-
-    return this.prisma.product.update({
+  
+    // Update the main product details
+    const updatedProduct = await this.prisma.product.update({
       where: { id },
       data: {
         name,
-        category,
         description,
         images: imagesJson,
         price,
-        attributes: {
-          deleteMany: {},
-          create: attributes,
-        },
       },
     });
+  
+    // Update attributes
+    if (attributes && attributes.length > 0) {
+      // Delete existing attributes associated with the product
+      await this.prisma.productAttribute.deleteMany({
+        where: { productId: id },
+      });
+  
+      // Create new attributes
+      for (const attr of attributes) {
+        await this.prisma.productAttribute.create({
+          data: {
+            name: attr.name,
+            value: attr.value,
+            productId: id,
+          },
+        });
+      }
+    }
+  
+    return updatedProduct;
   }
+  
 
   async deleteProduct(id: number): Promise<Product> {
     return this.prisma.product.delete({
@@ -94,7 +109,6 @@ export class ProductService {
 
   async searchProducts(
     name?: string,
-    category?: string,
     attributes?: { name: string; value: string }[],
   ): Promise<Product[]> {
     const attributeConditions: Prisma.ProductAttributeWhereInput[] = [];
@@ -111,7 +125,6 @@ export class ProductService {
     const products = await this.prisma.product.findMany({
       where: {
         name: { contains: name },
-        category: category ? { contains: category } : undefined,
         attributes: attributeConditions.length
           ? {
               some: {

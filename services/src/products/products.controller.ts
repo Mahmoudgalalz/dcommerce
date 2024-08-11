@@ -18,11 +18,10 @@ export class ProductController {
 
   @Post()
   async createProduct(@Body() createProductDto: CreateProductDto) {
-    const { name, category, description, images, price, attributes } =
+    const { name, description, images, price, attributes } =
       createProductDto;
     return this.productService.createProduct(
       name,
-      category,
       description,
       images,
       price,
@@ -38,7 +37,6 @@ export class ProductController {
   @Get('search')
   async searchProducts(
     @Query('name') name?: string,
-    @Query('category') category?: string,
     @Query('attributes') attributes?: string, // Format: "key:value,key:value"
   ) {
     let parsedAttributes = [];
@@ -48,7 +46,7 @@ export class ProductController {
         return { name, value };
       });
     }
-    return this.productService.searchProducts(name, category, parsedAttributes);
+    return this.productService.searchProducts(name, parsedAttributes);
   }
 
   @Get(':id')
@@ -61,12 +59,11 @@ export class ProductController {
     @Param('id') id: number,
     @Body() updateProductDto: UpdateProductDto,
   ) {
-    const { name, category, description, images, price, attributes } =
+    const { name, description, images, price, attributes } =
       updateProductDto;
     return this.productService.updateProduct(
       +id,
       name,
-      category,
       description,
       images,
       price,

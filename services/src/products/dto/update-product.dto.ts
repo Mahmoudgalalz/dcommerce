@@ -1,6 +1,5 @@
 export class UpdateProductDto {
   name?: string;
-  category?: string;
   description?: string;
   images?: string[]; // Optional array of image URLs or paths
   price?: number;

@@ -1,6 +1,5 @@
 export class CreateProductDto {
   name: string;
-  category: string;
   description: string;
   images: string[]; // Expect an array of image URLs or paths
   price: number;
