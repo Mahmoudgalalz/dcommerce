@@ -8,6 +8,10 @@ interface AddProductModalProps {
 
 const AddProductModal = ({ isOpen, onClose, onAddProduct }: AddProductModalProps) => {
   const [attributes, setAttributes] = useState<Attribute[]>([]);
+  const [name, setName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [images, setImages] = useState<string>('');
+  const [price, setPrice] = useState<string>('');
 
   const handleAttributeChange = (index: number, field: keyof Attribute, value: string) => {
     const newAttributes = [...attributes];
@@ -21,22 +25,30 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }: AddProductModalProps
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const images = formData.get('images')?.toString().split(',') || [];
+    const imagesArray = images.split(',').map((img) => img.trim());
     const productData: Product = {
-      name: formData.get('name')?.toString() || '',
-      description: formData.get('description')?.toString() || '',
-      images: images.map((img) => img.trim()), // Ensure images are trimmed and split correctly
-      price: parseFloat(formData.get('price')?.toString() || '0'),
+      name,
+      description,
+      images: imagesArray,
+      price: parseFloat(price),
       attributes,
     };
     onAddProduct(productData);
+
+    setName('');
+    setDescription('');
+    setImages('');
+    setPrice('');
+    setAttributes([]);
+
     onClose();
   };
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${isOpen ? 'block' : 'hidden'}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${
+        isOpen ? 'block' : 'hidden'
+      }`}
     >
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
         <h2 className="text-2xl mb-4">Add New Product</h2>
@@ -46,6 +58,8 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }: AddProductModalProps
             <input
               name="name"
               type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
               className="w-full p-2 border border-gray-300 rounded-md"
             />
@@ -54,6 +68,8 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }: AddProductModalProps
             <label className="block text-gray-700">Description</label>
             <textarea
               name="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded-md"
             />
           </div>
@@ -62,6 +78,8 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }: AddProductModalProps
             <input
               name="images"
               type="text"
+              value={images}
+              onChange={(e) => setImages(e.target.value)}
               required
               className="w-full p-2 border border-gray-300 rounded-md"
             />
@@ -72,6 +90,8 @@ const AddProductModal = ({ isOpen, onClose, onAddProduct }: AddProductModalProps
               name="price"
               type="number"
               step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
               required
               className="w-full p-2 border border-gray-300 rounded-md"
             />

@@ -12,10 +12,10 @@ export class ProductService {
     images: string[],
     price: number,
     attributes: { name: string; value: string }[],
-  ): Promise<Product> {
+  ): Promise<any> {
     const imagesJson = JSON.stringify(images);
 
-    return this.prisma.product.create({
+    const createdProduct = await this.prisma.product.create({
       data: {
         name,
         description,
@@ -25,7 +25,16 @@ export class ProductService {
           create: attributes,
         },
       },
+      include: {
+        attributes: true,
+      }
     });
+    const updatedImages = createdProduct.images ? JSON.parse(createdProduct.images) : [];
+  
+    return {
+      ...createdProduct,
+      images: updatedImages,
+    };
   }
 
   async getAllProducts(): Promise<Product[]> {
@@ -64,28 +73,14 @@ export class ProductService {
     images?: string[],
     price?: number,
     attributes?: { id?: number; name: string; value: string }[],
-  ): Promise<Product> {
+  ): Promise<any> {
     const imagesJson = images ? JSON.stringify(images) : undefined;
   
-    // Update the main product details
-    const updatedProduct = await this.prisma.product.update({
-      where: { id },
-      data: {
-        name,
-        description,
-        images: imagesJson,
-        price,
-      },
-    });
-  
-    // Update attributes
     if (attributes && attributes.length > 0) {
-      // Delete existing attributes associated with the product
       await this.prisma.productAttribute.deleteMany({
         where: { productId: id },
       });
   
-      // Create new attributes
       for (const attr of attributes) {
         await this.prisma.productAttribute.create({
           data: {
@@ -96,9 +91,26 @@ export class ProductService {
         });
       }
     }
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        images: imagesJson,
+        price,
+      },
+      include:{ attributes: true }
+    });
   
-    return updatedProduct;
+    const updatedImages = updatedProduct.images ? JSON.parse(updatedProduct.images) : [];
+  
+    return {
+      ...updatedProduct,
+      images: updatedImages,
+    };
   }
+  
   
 
   async deleteProduct(id: number): Promise<Product> {
@@ -108,39 +120,45 @@ export class ProductService {
   }
 
   async searchProducts(
-    name?: string,
-    attributes?: { name: string; value: string }[],
+    searchValue?: string,
   ): Promise<Product[]> {
-    const attributeConditions: Prisma.ProductAttributeWhereInput[] = [];
-
-    if (attributes) {
-      attributes.forEach((attribute) => {
-        attributeConditions.push({
-          name: attribute.name,
-          value: attribute.value,
-        });
-      });
-    }
-
     const products = await this.prisma.product.findMany({
       where: {
-        name: { contains: name },
-        attributes: attributeConditions.length
-          ? {
+        OR: [
+          {
+            name: {
+              contains: searchValue,
+            },
+          },
+          {
+            attributes: {
               some: {
-                AND: attributeConditions,
+                OR: [
+                  {
+                    name: {
+                      contains: searchValue,
+                    },
+                  },
+                  {
+                    value: {
+                      contains: searchValue,
+                    },
+                  },
+                ],
               },
-            }
-          : undefined,
+            },
+          },
+        ],
       },
       include: {
         attributes: true,
       },
     });
-
+  
     return products.map((product) => ({
       ...product,
       images: product.images ? JSON.parse(product.images) : [],
     }));
   }
+  
 }

@@ -37,16 +37,8 @@ export class ProductController {
   @Get('search')
   async searchProducts(
     @Query('name') name?: string,
-    @Query('attributes') attributes?: string, // Format: "key:value,key:value"
   ) {
-    let parsedAttributes = [];
-    if (attributes) {
-      parsedAttributes = attributes.split(',').map((attr) => {
-        const [name, value] = attr.split(':');
-        return { name, value };
-      });
-    }
-    return this.productService.searchProducts(name, parsedAttributes);
+    return this.productService.searchProducts(name);
   }
 
   @Get(':id')

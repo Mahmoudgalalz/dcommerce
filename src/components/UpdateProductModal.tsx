@@ -33,6 +33,11 @@ const UpdateProductModal = ({
     setAttributes([...attributes, { name: '', value: '' }]);
   };
 
+  const handleRemoveAttribute = (index: number) => {
+    const newAttributes = attributes.filter((_, i) => i !== index);
+    setAttributes(newAttributes);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const updatedProduct: Product = {
@@ -43,7 +48,6 @@ const UpdateProductModal = ({
       price,
       attributes,
     };
-    console.log(updatedProduct)
     await onUpdateProduct(updatedProduct);
     onClose();
   };
@@ -100,13 +104,13 @@ const UpdateProductModal = ({
           <div className="mb-4">
             <label className="block text-gray-700">Attributes</label>
             {attributes.map((attr, index) => (
-              <div key={index} className="mb-2">
+              <div key={index} className="mb-2 flex space-x-2">
                 <input
                   type="text"
                   placeholder="Name"
                   value={attr.name}
                   onChange={(e) => handleAttributeChange(index, 'name', e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md mb-2"
+                  className="w-full p-2 border border-gray-300 rounded-md"
                 />
                 <input
                   type="text"
@@ -115,6 +119,13 @@ const UpdateProductModal = ({
                   onChange={(e) => handleAttributeChange(index, 'value', e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-md"
                 />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveAttribute(index)}
+                  className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                >
+                  Remove
+                </button>
               </div>
             ))}
             <button
@@ -130,9 +141,9 @@ const UpdateProductModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="mr-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              className="mr-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
             >
-              Close
+              Cancel
             </button>
             <button
               type="submit"
